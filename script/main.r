@@ -2,6 +2,7 @@
 install.packages("inspectr", repos="http://R-Forge.R-project.org")
 library(pls)
 library(inspectr)
+source("optisim.r")
 
 setwd("/home/dainius/Documents/Advanced Earth Observation/AEO-validation-paper/script/")
 
@@ -18,6 +19,9 @@ rm(DATA2)
 # have them ordered by whichever sample was taken first.
 DATA = DATA[order(DATA$Sample, DATA$RowID),]
 
+# Make into an inspectr SpectraDataFrame
+sDATA = DATA
+spectra(sDATA) = id ~ pH + Moisture + OM ~ 420:2500
 
 # Plot validation plots
 # Wrapper function for simpler plsr
@@ -159,5 +163,44 @@ hist(DATA$pH, freq=FALSE, breaks=16)
 # Repeat the above in Monte Carlo
 
 # Kennard-Stone algorithm: select the spectra with the largest differences
+# Rather slow! It returns the same things every time, so just running it
+# with the highest setting once is enough.
+sampleresponse = data.frame()
+sampfull = kenstone(sDATA, floor(16^2))
+for(i in floor((seq(4.5, 16, 0.5))^2))
+{
+    samp = sampfull[1:i]
+    tset = DATA[samp,]
+    vset = DATA[-samp,]
+    vspec = vset[7:ncol(vset)]
+    rsm = fplsr(yvar, data=tset, ncomp=compnr, validation = "none")
+    pred.tst <- predict(rsm, comps = 1:compnr, newdata = as.matrix(vspec))
+    RMSE.xval <- sqrt(mean((vset$pH - pred.tst)^2))
+    sampleresponse = rbind(sampleresponse, data.frame(i=i, RMSE=RMSE.xval))
+    #plot (pred.tst ~ vset$pH, xlab="Observed (validation)", ylab="Predicted (training)", main="pH observed vs predicted")
+    #abline(0, 1)
+}
+plot(sampleresponse$RMSE~sampleresponse$i, type="l", xlab="Samples in training set", ylab="RMSE")
 
-# OptiSim: a quicker version of Kennard-Stone, use k=4 as per paper
+# OptiSim: a quicker version of Kennard-Stone, using k=4 as per paper
+# This is random subsets of 4 samples, so technically Monte Carlo would apply,
+# but the results shouldn't vary enough for it to be worth the time
+# (and definitely not if it exceeds Kennard-Stone time of calculation)
+sampleresponse = data.frame()
+sampfull = optisim(sDATA, 16^2, 4)
+for(i in floor((seq(4.5, 16, 0.5))^2))
+{
+    # Rather odd way of converting factors to IDs, since optisim() returns selected SpectraDataFrame,
+    # whereas we need the non-selected ones too
+    samp = as.numeric(levels(sampfull@id[,1]))[sampfull@id[,1]][1:i]
+    tset = DATA[samp,]
+    vset = DATA[-samp,]
+    vspec = vset[7:ncol(vset)]
+    rsm = fplsr(yvar, data=tset, ncomp=compnr, validation = "none")
+    pred.tst <- predict(rsm, comps = 1:compnr, newdata = as.matrix(vspec))
+    RMSE.xval <- sqrt(mean((vset$pH - pred.tst)^2))
+    sampleresponse = rbind(sampleresponse, data.frame(i=i, RMSE=RMSE.xval))
+    #plot (pred.tst ~ vset$pH, xlab="Observed (validation)", ylab="Predicted (training)", main="pH observed vs predicted")
+    #abline(0, 1)
+}
+plot(sampleresponse$RMSE~sampleresponse$i, type="l", xlab="Samples in training set", ylab="RMSE")
