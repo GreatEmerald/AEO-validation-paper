@@ -322,12 +322,14 @@ plot(av6.rand$RMSE~av6.rand$sample, type="l", xlab="Samples in training set", yl
     ylim=c(min(min(av6.rand$RMSE), min(av6.boot$RMSE), min(av6.kstn$RMSE), min(av6.osim$RMSE)),
         max(max(av6.rand$RMSE), max(av6.boot$RMSE), max(av6.kstn$RMSE), max(av6.osim$RMSE))))
 lines(av6.randmc$RMSE~av6.randmc$sample, col=2)
-lines(av6.boot$RMSE~av6.boot$sample, col=3)
-lines(av6.bootmc$RMSE~av6.bootmc$sample, col=4)
-lines(av6.strt$RMSE~av6.strt$sample, col=5)
-lines(av6.strtmc$RMSE~av6.strtmc$sample, col=6)
-lines(av6.kstn$RMSE~av6.kstn$sample, col=7)
-lines(av6.osim$RMSE~av6.osim$sample, col=8)
+lines(av6.boot$RMSE~av6.boot$sample, col=7)
+lines(av6.bootmc$RMSE~av6.bootmc$sample, col=3)
+lines(av6.strt$RMSE~av6.strt$sample, col=8)
+lines(av6.strtmc$RMSE~av6.strtmc$sample, col=4)
+lines(av6.kstn$RMSE~av6.kstn$sample, col=5)
+lines(av6.osim$RMSE~av6.osim$sample, col=6)
+legend("topright", c("Random", "Random Monte Carlo", "Bootstrap", "Bootstrap Monte Carlo",
+    "Stratified random", "Stratified random Monte Carlo", "Kennard-Stone", "Optisim, k=4"), col=c(1,2,7,3,8,4,5,6), lty=c(1,1,1,1,1,1,1,1))
 
 plot(av6.rand$RPD~av6.rand$sample, type="l", xlab="Samples in training set", ylab="RPD", col=1,
     ylim=c(min(min(av6.rand$RPD), min(av6.boot$RPD), min(av6.kstn$RPD), min(av.osim$RPD)),
