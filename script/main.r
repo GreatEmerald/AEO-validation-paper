@@ -252,12 +252,14 @@ plot(av.rand$RMSE~av.rand$sample, type="l", xlab="Samples in training set", ylab
     ylim=c(min(min(av.rand$RMSE), min(av.boot$RMSE), min(av.kstn$RMSE), min(av.osim$RMSE)),
         max(max(av.rand$RMSE), max(av.boot$RMSE), max(av.kstn$RMSE), max(av.osim$RMSE))))
 lines(av.randmc$RMSE~av.randmc$sample, col=2)
-lines(av.boot$RMSE~av.boot$sample, col=3)
-lines(av.bootmc$RMSE~av.bootmc$sample, col=4)
-lines(av.strt$RMSE~av.strt$sample, col=5)
-lines(av.strtmc$RMSE~av.strtmc$sample, col=6)
-lines(av.kstn$RMSE~av.kstn$sample, col=7)
-lines(av.osim$RMSE~av.osim$sample, col=8)
+lines(av.boot$RMSE~av.boot$sample, col=7)
+lines(av.bootmc$RMSE~av.bootmc$sample, col=3)
+lines(av.strt$RMSE~av.strt$sample, col=8)
+lines(av.strtmc$RMSE~av.strtmc$sample, col=4)
+lines(av.kstn$RMSE~av.kstn$sample, col=5)
+lines(av.osim$RMSE~av.osim$sample, col=6)
+legend("topright", c("Random", "Random Monte Carlo", "Bootstrap", "Bootstrap Monte Carlo",
+    "Stratified random", "Stratified random Monte Carlo", "Kennard-Stone", "Optisim, k=4"), col=c(1,2,7,3,8,4,5,6), lty=c(1,1,1,1,1,1,1,1))
 
 plot(av.rand$RPD~hv.rand$sample, type="l", xlab="Samples in training set", ylab="RPD", col=1,
     ylim=c(min(min(av.rand$RPD), min(av.boot$RPD), min(av.kstn$RPD), min(av.osim$RPD)),
