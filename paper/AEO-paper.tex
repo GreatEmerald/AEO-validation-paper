@@ -67,8 +67,8 @@ There are numerous strategies for splitting the samples into training and valida
 In order to assess how cross-validation techniques influence the selection of the number of components, the R package \textit{plsr} was used, specifically the function \textit{validationplot()} with different cross-validation parameters available in the package. Tested cross-validation sampling stategies were: Leave-one-out (LOO), random, Monte Carlo random, interleaved and consecutive. For sampling strategies other than LOO, the full data set was divided into two subsets validated against each other. If the number of subsets increases, the result gets closer and closer to LOO cross-validation result (see figure \ref{fig:interleaved-group-sizes}).
 
 \begin{figure}[ht!]
+\includegraphics[width=1.0\columnwidth]{../script/output/interleaved-group-sizes.pdf}
 \begin{center}
-    %\includegraphics[width=1.0\columnwidth]{../script/output/interleaved-group-sizes.eps}
     \caption{Interleaved cross-validation result with different number of cross-validation subsets \textit{k}.}
     \label{fig:interleaved-group-sizes}
 \end{center}
