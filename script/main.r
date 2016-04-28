@@ -21,7 +21,7 @@ DATA = DATA[order(DATA$Sample, DATA$RowID),]
 
 # Make into an inspectr SpectraDataFrame
 sDATA = DATA
-spectra(sDATA) = id ~ pH + Moisture + OM ~ 420:2500
+spectra(sDATA) = id ~ pH ~ 420:2500
 
 # Harmonise the names in the australia dataset
 AUSTRALIA = australia
@@ -121,10 +121,11 @@ compnr = 16
 
 # Semi-generic function for running all the different sampling strategies
 # Returns a data.frame with relevant statistics (RMSE, R2, etc.) for the amount of samples
-# type defines which validation strategy to use: random, bootstrap, none (if samples are provided)
+# type defines which validation strategy to use: random, bootstrap, stratified, none (if samples are provided)
+# strata defines on which values of the response variable to break the samples into strata, only 1 supported right now
 # mc.runs defines how many times to run the Monte Carlo analysis (1 means no MC)
 # validation.set overrides the validation set used (when unset, non-selected samples are used)
-hvalidation = function(type = "none", samples = c(), mc.runs=1, data=DATA, validation.set=NULL, ncomp=compnr, static.seed=TRUE)
+hvalidation = function(type = "none", samples = c(), strata = c(), mc.runs=1, data=DATA, validation.set=NULL, ncomp=compnr, static.seed=TRUE)
 {
     if(static.seed)
         set.seed(430001)
@@ -138,6 +139,10 @@ hvalidation = function(type = "none", samples = c(), mc.runs=1, data=DATA, valid
                 samp = sample(nrow(data), i)
             if(type == "bootstrap")
                 samp = sample(nrow(data), i, replace=TRUE)
+            if(type == "stratified" && is.numeric(strata))
+                samp1 = sample(as.numeric(rownames(data[data$pH<strata[[1]],])), round(i/2))
+                samp2 = sample(as.numeric(rownames(data[data$pH>=strata[[1]],])), round(i/2))
+                samp = c(samp1, samp2)
             if(type == "none" && is.numeric(samples))
                 samp = samples[1:i]
             tset = data[samp,]
@@ -147,7 +152,7 @@ hvalidation = function(type = "none", samples = c(), mc.runs=1, data=DATA, valid
                 vset = data[-samp,]
             vspec = subset(vset, select=c(X420:X1849, X1951:X2500))
             model = fplsr(yvar, data=tset, ncomp=ncomp, validation = "none")
-            pred = predict(model, comps = 1:compnr, newdata = as.matrix(vspec))
+            pred = predict(model, comps = 1:ncomp, newdata = as.matrix(vspec))
             pred.RMSE = sqrt(mean((vset$pH - pred)^2))
             pred.RPD = sd(vset$pH)/pred.RMSE
             rundata = rbind(rundata, data.frame(samples=i, RMSE=pred.RMSE, RPD=pred.RPD))
@@ -182,9 +187,11 @@ plot(hv.bootmc$RMSE~hv.bootmc$sample, type="l")
 hist(DATA$pH, freq=FALSE, breaks=16)
 # Else, parametric optimisation can be applied (like kenstone, but bins instead of samples)
 # This can use k-means clustering to determine strata, but how many? 2 (peaks in pH)? 16 (components)? By pH, or other variables?
-# Leave for later
+# Go with an acid/alkaline split for now: median is close to 7 and gives balanced results without bootstrap
+hv.strt = hvalidation(type="stratified", strata=c(median(DATA$pH)))
 
 # Repeat the above in Monte Carlo
+hv.strtmc = hvalidation(type="stratified", strata=c(median(DATA$pH)), mc.runs=100)
 
 # Kennard-Stone algorithm: select the spectra with the largest differences
 # Rather slow! It returns the same things every time, so just running it
@@ -210,8 +217,10 @@ plot(hv.rand$RMSE~hv.rand$sample, type="l", xlab="Samples in training set", ylab
 lines(hv.randmc$RMSE~hv.randmc$sample, col=2)
 lines(hv.boot$RMSE~hv.boot$sample, col=3)
 lines(hv.bootmc$RMSE~hv.bootmc$sample, col=4)
-lines(hv.kstn$RMSE~hv.kstn$sample, col=5)
-lines(hv.osim$RMSE~hv.osim$sample, col=6)
+lines(hv.strt$RMSE~hv.strt$sample, col=5)
+lines(hv.strtmc$RMSE~hv.strtmc$sample, col=6)
+lines(hv.kstn$RMSE~hv.kstn$sample, col=7)
+lines(hv.osim$RMSE~hv.osim$sample, col=8)
 
 # RPD
 plot(hv.rand$RPD~hv.rand$sample, type="l", xlab="Samples in training set", ylab="RPD", col=1,
@@ -228,6 +237,8 @@ av.rand = hvalidation(type="random", validation.set=AUSTRALIA)
 av.randmc = hvalidation(type="random", mc.runs=100, validation.set=AUSTRALIA)
 av.boot = hvalidation(type="bootstrap", validation.set=AUSTRALIA)
 av.bootmc = hvalidation(type="bootstrap", mc.runs=100, validation.set=AUSTRALIA)
+av.strt = hvalidation(type="stratified", strata=c(median(DATA$pH)), validation.set=AUSTRALIA)
+av.strtmc = hvalidation(type="stratified", strata=c(median(DATA$pH)), mc.runs=100, validation.set=AUSTRALIA)
 # ks.full has already been calculated, no need to redo that
 av.kstn = hvalidation(type="none", samples=ks.full, validation.set=AUSTRALIA)
 # No need to recalculate os.samples either
@@ -239,8 +250,10 @@ plot(av.rand$RMSE~av.rand$sample, type="l", xlab="Samples in training set", ylab
 lines(av.randmc$RMSE~av.randmc$sample, col=2)
 lines(av.boot$RMSE~av.boot$sample, col=3)
 lines(av.bootmc$RMSE~av.bootmc$sample, col=4)
-lines(av.kstn$RMSE~av.kstn$sample, col=5)
-lines(av.osim$RMSE~av.osim$sample, col=6)
+lines(av.strt$RMSE~av.strt$sample, col=5)
+lines(av.strtmc$RMSE~av.strtmc$sample, col=6)
+lines(av.kstn$RMSE~av.kstn$sample, col=7)
+lines(av.osim$RMSE~av.osim$sample, col=8)
 
 plot(av.rand$RPD~hv.rand$sample, type="l", xlab="Samples in training set", ylab="RPD", col=1,
     ylim=c(min(min(av.rand$RPD), min(av.boot$RPD), min(av.kstn$RPD), min(av.osim$RPD)),
@@ -248,14 +261,18 @@ plot(av.rand$RPD~hv.rand$sample, type="l", xlab="Samples in training set", ylab=
 lines(av.randmc$RPD~av.randmc$sample, col=2)
 lines(av.boot$RPD~av.boot$sample, col=3)
 lines(av.bootmc$RPD~av.bootmc$sample, col=4)
-lines(av.kstn$RPD~av.kstn$sample, col=5)
-lines(av.osim$RPD~av.osim$sample, col=6)
+lines(av.strt$RPD~av.strt$sample, col=5)
+lines(av.strtmc$RPD~av.strtmc$sample, col=6)
+lines(av.kstn$RPD~av.kstn$sample, col=7)
+lines(av.osim$RPD~av.osim$sample, col=8)
 
 ## Retry everything with 6 components
-hv6.rand = hvalidation(type="random", ncomp=12)
+hv6.rand = hvalidation(type="random", ncomp=6)
 hv6.randmc = hvalidation(type="random", mc.runs=100, ncomp=6)
 hv6.boot = hvalidation(type="bootstrap", ncomp=6)
 hv6.bootmc = hvalidation(type="bootstrap", mc.runs=100, ncomp=6)
+hv6.strt = hvalidation(type="stratified", strata=c(median(DATA$pH)), ncomp=6)
+hv6.strtmc = hvalidation(type="stratified", strata=c(median(DATA$pH)), mc.runs=100, ncomp=6)
 hv6.kstn = hvalidation(type="none", samples=ks.full, ncomp=6)
 hv6.osim = hvalidation(type="none", samples=os.samples, ncomp=6)
 
@@ -265,8 +282,10 @@ plot(hv6.rand$RMSE~hv6.rand$sample, type="l", xlab="Samples in training set", yl
 lines(hv6.randmc$RMSE~hv6.randmc$sample, col=2)
 lines(hv6.boot$RMSE~hv6.boot$sample, col=3)
 lines(hv6.bootmc$RMSE~hv6.bootmc$sample, col=4)
-lines(hv6.kstn$RMSE~hv6.kstn$sample, col=5)
-lines(hv6.osim$RMSE~hv6.osim$sample, col=6)
+lines(hv6.strt$RMSE~hv6.strt$sample, col=5)
+lines(hv6.strtmc$RMSE~hv6.strtmc$sample, col=6)
+lines(hv6.kstn$RMSE~hv6.kstn$sample, col=7)
+lines(hv6.osim$RMSE~hv6.osim$sample, col=8)
 
 # RPD
 plot(hv6.rand$RPD~hv6.rand$sample, type="l", xlab="Samples in training set", ylab="RPD", col=1,
@@ -275,32 +294,40 @@ plot(hv6.rand$RPD~hv6.rand$sample, type="l", xlab="Samples in training set", yla
 lines(hv6.randmc$RPD~hv6.randmc$sample, col=2)
 lines(hv6.boot$RPD~hv6.boot$sample, col=3)
 lines(hv6.bootmc$RPD~hv6.bootmc$sample, col=4)
-lines(hv6.kstn$RPD~hv6.kstn$sample, col=5)
-lines(hv6.osim$RPD~hv6.osim$sample, col=6)
+lines(hv6.strt$RPD~hv6.strt$sample, col=5)
+lines(hv6.strtmc$RPD~hv6.strtmc$sample, col=6)
+lines(hv6.kstn$RPD~hv6.kstn$sample, col=7)
+lines(hv6.osim$RPD~hv6.osim$sample, col=8)
 
 av6.rand = hvalidation(type="random", validation.set=AUSTRALIA, ncomp=6)
 av6.randmc = hvalidation(type="random", mc.runs=100, validation.set=AUSTRALIA, ncomp=6)
 av6.boot = hvalidation(type="bootstrap", validation.set=AUSTRALIA, ncomp=6)
 av6.bootmc = hvalidation(type="bootstrap", mc.runs=100, validation.set=AUSTRALIA, ncomp=6)
+av6.strt = hvalidation(type="stratified", strata=c(median(DATA$pH)), validation.set=AUSTRALIA, ncomp=6)
+av6.strtmc = hvalidation(type="stratified", strata=c(median(DATA$pH)), mc.runs=100, validation.set=AUSTRALIA, ncomp=6)
 # ks.full has already been calculated, no need to redo that
-av.kstn = hvalidation(type="none", samples=ks.full, validation.set=AUSTRALIA, ncomp=6)
+av6.kstn = hvalidation(type="none", samples=ks.full, validation.set=AUSTRALIA, ncomp=6)
 # No need to recalculate os.samples either
-av.osim = hvalidation(type="none", samples=os.samples, validation.set=AUSTRALIA, ncomp=6)
+av6.osim = hvalidation(type="none", samples=os.samples, validation.set=AUSTRALIA, ncomp=6)
 
-plot(av.rand$RMSE~av.rand$sample, type="l", xlab="Samples in training set", ylab="RMSE", col=1,
-    ylim=c(min(min(av.rand$RMSE), min(av.boot$RMSE), min(av.kstn$RMSE), min(av.osim$RMSE)),
-        max(max(av.rand$RMSE), max(av.boot$RMSE), max(av.kstn$RMSE), max(av.osim$RMSE))))
-lines(av.randmc$RMSE~av.randmc$sample, col=2)
-lines(av.boot$RMSE~av.boot$sample, col=3)
-lines(av.bootmc$RMSE~av.bootmc$sample, col=4)
-lines(av.kstn$RMSE~av.kstn$sample, col=5)
-lines(av.osim$RMSE~av.osim$sample, col=6)
+plot(av6.rand$RMSE~av6.rand$sample, type="l", xlab="Samples in training set", ylab="RMSE", col=1,
+    ylim=c(min(min(av6.rand$RMSE), min(av6.boot$RMSE), min(av6.kstn$RMSE), min(av6.osim$RMSE)),
+        max(max(av6.rand$RMSE), max(av6.boot$RMSE), max(av6.kstn$RMSE), max(av6.osim$RMSE))))
+lines(av6.randmc$RMSE~av6.randmc$sample, col=2)
+lines(av6.boot$RMSE~av6.boot$sample, col=3)
+lines(av6.bootmc$RMSE~av6.bootmc$sample, col=4)
+lines(av6.strt$RMSE~av6.strt$sample, col=5)
+lines(av6.strtmc$RMSE~av6.strtmc$sample, col=6)
+lines(av6.kstn$RMSE~av6.kstn$sample, col=7)
+lines(av6.osim$RMSE~av6.osim$sample, col=8)
 
-plot(av.rand$RPD~hv.rand$sample, type="l", xlab="Samples in training set", ylab="RPD", col=1,
-    ylim=c(min(min(av.rand$RPD), min(av.boot$RPD), min(av.kstn$RPD), min(av.osim$RPD)),
-        max(max(av.rand$RPD), max(av.boot$RPD), max(av.kstn$RPD), max(av.osim$RPD))))
-lines(av.randmc$RPD~av.randmc$sample, col=2)
-lines(av.boot$RPD~av.boot$sample, col=3)
-lines(av.bootmc$RPD~av.bootmc$sample, col=4)
-lines(av.kstn$RPD~av.kstn$sample, col=5)
-lines(av.osim$RPD~av.osim$sample, col=6)
+plot(av6.rand$RPD~av6.rand$sample, type="l", xlab="Samples in training set", ylab="RPD", col=1,
+    ylim=c(min(min(av6.rand$RPD), min(av6.boot$RPD), min(av6.kstn$RPD), min(av.osim$RPD)),
+        max(max(av6.rand$RPD), max(av6.boot$RPD), max(av6.kstn$RPD), max(av.osim$RPD))))
+lines(av6.randmc$RPD~av6.randmc$sample, col=2)
+lines(av6.boot$RPD~av6.boot$sample, col=3)
+lines(av6.bootmc$RPD~av6.bootmc$sample, col=4)
+lines(av6.strt$RPD~av6.strt$sample, col=5)
+lines(av6.strtmc$RPD~av6.strtmc$sample, col=6)
+lines(av6.kstn$RPD~av6.kstn$sample, col=7)
+lines(av6.osim$RPD~av6.osim$sample, col=8)
