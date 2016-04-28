@@ -82,7 +82,7 @@ For assessing holdout validation techniques, samples were split into training an
 
 Two strata were used for stratified random sampling: one stratum included samples with pH below the median pH for all samples (6.11), and the other included all samples equal or above the median. The strata were chosen as such because pH distribution among samples is bimodal, with fewer values around the median value (which is also close to the neutral pH value of 7). Splitting the strata at the median allows for balanced strata, without the need to use bootstrapping or drop samples.
 
-The validation was repeated twice: the first time the validation set used samples from the same Netherlands soil dataset as the training set, whereas the second time the external Australian soil dataset was used for validation.
+The validation was repeated twice: the first time the validation set used all unused samples from the same Netherlands soil dataset as the training set, whereas the second time the external Australian soil dataset was used for validation.
 
 In addition, the above was repeated twice, using different number of latent vectors for the PLS regression, in order to see how the choice of the number of latent vectors from cross-validation impacts the PLS regression and its holdout validation.
 
@@ -112,7 +112,21 @@ Given the cross-validation results, holdout validation analysis was first done u
 
 \subsection{Holdout validation strategies}\label{sec:Holdout validation strategies 2}
 
+When comparing how RMSE values change as the number of samples used in the PLS regression increases using various holdout validation strategies, with validation samples from the same dataset, we can see a typical pattern of RMSE gradually going down until it becomes stable at around 150 samples for most sampling strategies (see figure \ref{fig:rmse-nl-16}).
 
+Just like with cross-validation, sampling methods that have a random component to them (simple and stratified random sampling as well as bootstrapping) are not consistent when performed only once and require Monte Carlo simulations to become stable. The standard deviation of these methods is generally higher towards the edges, that is, when either the training or the validation set sizes become low.
+
+Stratified and simple random sampling after 100 Monte Carlo runs result in very similar RMSE values, whereas bootstrapping gives slightly higher RMSE values.
+
+Kennard-Stone sampling results in the lowest RMSE values, no matter the sample size. Optisim sampling performs very poorly when the training set size is very low, but quickly gets better as more samples are added to the training set, even overtaking Kennard-Stone sampling at 56 samples in the training set. However, the decrease in RMSE when adding more samples to the model beyond that is no longer any better than when using simple or stratified Monte Carlo methods.
+
+\begin{figure}[ht!]
+\includegraphics[width=1.0\columnwidth]{../script/output/rmse-nl-16.pdf}
+\begin{center}
+    \caption{Performance of various holdout validation strategies as the training set size increases. The validation set consists of all samples from the same dataset not used in the training set, number of latent vectors used is 16.}
+    \label{fig:rmse-nl-16}
+\end{center}
+\end{figure}
 
 \section{DISCUSSION}\label{sec:DISCUSSION}
 
@@ -125,6 +139,14 @@ Leave-one-out cross-validation result itself is deterministic, however, it requi
 Interleaved sampling in this case gave good results, was fast and deterministic, however, it depends on the way the dataset is organised. Often times datasets are ordered by how the samples were taken, for instance, by starting collecting samples at one end of an area and finishing at the other. However, if every or nearly every other sample was taken from an area with different properties, then the subsets of interleaved samples will no longer be representative of one another and result in unusually high RMSE values. Therefore choosing interleaved sampling with no \textit{a priori} knowledge of how the dataset was made is risky and may lead to an incorrect choice of latent vectors to use.
 
 That is what happened in this case with consecutive sampling. If there is a gradient or a jump in values in the dataset due to physical properties at one end of an area being different from the other end of it, consecutive sampling will produce subsets that are not representative of one another.
+
+\subsection{Holdout validation strategies}\label{sec:Holdout validation strategies 3}
+
+From the holdout validation strategies tested, Kennard-Stone sampling performed the best in all cases. This is due to the Kennard-Stone algorithm selecting samples of highest difference from the dataset first. Since those samples have the largest variation, they also hold most of the information about the data collected, and the rest of the samples (which are less extreme) are used for validation, thus resulting in a consistently lower RMSE. However, calculating the differences between each of the samples takes a lot of time and computing power.
+
+Stratified random sampling generally performed the same as simple random sampling. This is likely to be due to the rather simplistic method of stratifying chosen. If there was data about the soil type that each spectrum represented, and it was used to divide the dataset into strata, then the performance between simple and stratified sampling might have been different.
+
+Bootstrap sampling performed worse than random sampling without replacement, since samples were duplicated. This acts opposite of the Kennard-Stone method, with more redundant data going into the training set, and the model overfitting those samples, compared to the remaining ones (that were used for validation).
 
 {%\footnotesize
 	\begin{spacing}{0.9}% tune the size by altering the parameter
