@@ -64,19 +64,27 @@ There are numerous strategies for splitting the samples into training and valida
 
 \subsection{Cross-validation strategies}\label{sec:Cross-validation strategies}
 
-In order to assess how cross-validation techniques influence the selection of the number of components, the R package \textit{plsr} was used, specifically the function \textit{validationplot()} with different cross-validation parameters available in the package. Tested cross-validation sampling stategies were: Leave-one-out (LOO), random, Monte Carlo random, interleaved and consecutive. For sampling strategies other than LOO, the full data set was divided into two subsets validated against each other. If the number of subsets increases, the result gets closer and closer to LOO cross-validation result (see figure \ref{fig:interleaved-group-sizes}).
+In order to assess how cross-validation techniques influence the selection of the number of components, the R package \textit{plsr} was used, specifically the function \textit{validationplot()} with different cross-validation parameters available in the package. The validation plots show how the root mean square error of prediction (RMSEP) changes with an increasing number of latent vectors used in the regression.
+
+Tested cross-validation sampling stategies were: Leave-one-out (LOO), random, interleaved and consecutive sampling, as well as the mean of 100 Monte Carlo runs of random sampling. For sampling strategies other than LOO, the full data set was divided into two subsets validated against each other (2-fold cross-validation). If the number of subsets \textit{k} is increased, the result gets closer and closer to LOO cross-validation result (see figure \ref{fig:interleaved-group-sizes}), and at 16 groups is already very close to LOO.
 
 \begin{figure}[ht!]
 \includegraphics[width=1.0\columnwidth]{../script/output/interleaved-group-sizes.pdf}
 \begin{center}
-    \caption{Interleaved cross-validation result with different number of cross-validation subsets \textit{k}.}
+    \caption{Interleaved sampling cross-validation result with an increasing number of cross-validation subsets \textit{k}, compared to Leave-one-out validation.}
     \label{fig:interleaved-group-sizes}
 \end{center}
 \end{figure}
 
 \subsection{Holdout validation strategies}\label{sec:Holdout validation strategies}
 
-For assessing holdout validation techniques, samples were split into training and validation sets manually for random, interleaved and stratified sampling. For the respective Monte Carlo sampling, the splitting into different sets was repeated 100 times, and the result was averaged over all runs. For Kennard-Stone sampling, the R package \textit{inspectr} was used to generate the validation sample set, based on the Kennard-Stone algorithm \cite{kennard1969computer}. For OptiSim sampling \cite{clark1997optisim}, the latest in-development code from the \textit{inspectr} package was used. OptiSim sampling was run using k = 4, since studies have shown that it generally performs the best on hyperspectral datasets \cite{clark2003boosted}.
+For assessing holdout validation techniques, samples were split into training and validation sets manually for random without replacement, random with replacement (bootstrapping) and stratified random sampling. For the respective Monte Carlo simulations, the splitting into different sets was repeated 100 times, and the result was averaged over all runs. For Kennard-Stone sampling, the R package \textit{inspectr} was used to generate the validation sample set, based on the Kennard-Stone algorithm \cite{kennard1969computer}. For OptiSim sampling \cite{clark1997optisim}, the latest in-development code from the \textit{inspectr} package was used. OptiSim sampling was run using clusters of 4 samples (k = 4), since studies have shown that this setting generally performs the best on hyperspectral datasets \cite{clark2003boosted}.
+
+Two strata were used for stratified random sampling: one stratum included samples with pH below the median pH for all samples (6.11), and the other included all samples equal or above the median. The strata were chosen as such because pH distribution among samples is bimodal, with fewer values around the median value (which is also close to the neutral pH value of 7). Splitting the strata at the median allows for balanced strata, without the need to use bootstrapping or drop samples.
+
+The validation was repeated twice: the first time the validation set used samples from the same Netherlands soil dataset as the training set, whereas the second time the external Australian soil dataset was used for validation.
+
+In addition, the above was repeated twice, using different number of latent vectors for the PLS regression, in order to see how the choice of the number of latent vectors from cross-validation impacts the PLS regression and its holdout validation.
 
 \subsection{Data}\label{sec:Data}
 
@@ -84,8 +92,39 @@ The model used for this paper was created by using the Netherlands soil spectra 
 
 \section{RESULTS}\label{sec:RESULTS}
 
+\subsection{Cross-validation strategies}\label{sec:Cross-validation strategies 2}
+
+The cross-validation sampling strategies for the Netherlands soil dataset used produced similar results to one another, with the overall shape of the curve when an increasing number of latent vectors is used for the regression being the same across all the tested strategies except for consecutive sampling (see figure \ref{fig:cv}). Consecutive sampling resulted in higher RMSE values than other strategies, although the minimum RMSE value of 0.70 was still for 16 latent vectors, just like with LOO cross-validation (in which case the RMSE was 0.53).
+
+The random sampling strategy results in an unstable minimum RMSE value, since the full data set is split into two subsets randomly. Running Monte Carlo simulation for it results in more stable results (depending on the number of runs) which are also closer to those obtained by LOO cross-validation. The standard deviation of the Monte Carlo simulation was 0.02 RMSE.
+
+Of all the cross-validation strategies tested, the lowest RMSE values were obtained using interleaved cross-validation, however, whether interleaved cross-validation is suitable for use depends on the way the dataset is laid out. Monte Carlo simulation of random sampling resulted in the second lowest RMSE values, and LOO cross-validation had third lowest RMSE values.
+
+Given the cross-validation results, holdout validation analysis was first done using 16 latent vectors, and then repeated using 6 latent vectors, since it is the first local RMSE minimum for both LOO and consecutive cross-validation results.
+
+\begin{figure}[ht!]
+\includegraphics[width=1.0\columnwidth]{../script/output/cv.pdf}
+\begin{center}
+    \caption{PLSR validation plot when using different sampling strategies.}
+    \label{fig:cv}
+\end{center}
+\end{figure}
+
+\subsection{Holdout validation strategies}\label{sec:Holdout validation strategies 2}
+
+
 
 \section{DISCUSSION}\label{sec:DISCUSSION}
+
+\subsection{Cross-validation strategies}\label{sec:Cross-validation strategies 3}
+
+From the cross-validation strategies tested, each has its own peculiarities. Random sampling gives results that are not stable, therefore at low \textit{k} it is not suitable for determining the optimal number of latent vectors to use in the regression by itself. However, since for the dataset used the standard deviation of random sampling was low, using Monte Carlo random sampling, even with relatively low number of runs, is an option. Generally it gives results very similar to that of Leave-one-out cross-validation.
+
+Leave-one-out cross-validation result itself is deterministic, however, it requires recalculating the PLS regression for every sample included in the model, thus it takes more time than all other cross-validation strategies tested (aside from Monte Carlo, which can have an arbitrarily high number of runs).
+
+Interleaved sampling in this case gave good results, was fast and deterministic, however, it depends on the way the dataset is organised. Often times datasets are ordered by how the samples were taken, for instance, by starting collecting samples at one end of an area and finishing at the other. However, if every or nearly every other sample was taken from an area with different properties, then the subsets of interleaved samples will no longer be representative of one another and result in unusually high RMSE values. Therefore choosing interleaved sampling with no \textit{a priori} knowledge of how the dataset was made is risky and may lead to an incorrect choice of latent vectors to use.
+
+That is what happened in this case with consecutive sampling. If there is a gradient or a jump in values in the dataset due to physical properties at one end of an area being different from the other end of it, consecutive sampling will produce subsets that are not representative of one another.
 
 {%\footnotesize
 	\begin{spacing}{0.9}% tune the size by altering the parameter
