@@ -140,9 +140,11 @@ hvalidation = function(type = "none", samples = c(), strata = c(), mc.runs=1, da
             if(type == "bootstrap")
                 samp = sample(nrow(data), i, replace=TRUE)
             if(type == "stratified" && is.numeric(strata))
+            {
                 samp1 = sample(as.numeric(rownames(data[data$pH<strata[[1]],])), round(i/2))
                 samp2 = sample(as.numeric(rownames(data[data$pH>=strata[[1]],])), round(i/2))
                 samp = c(samp1, samp2)
+            }
             if(type == "none" && is.numeric(samples))
                 samp = samples[1:i]
             tset = data[samp,]
@@ -215,12 +217,14 @@ plot(hv.rand$RMSE~hv.rand$sample, type="l", xlab="Samples in training set", ylab
     ylim=c(min(min(hv.rand$RMSE), min(hv.boot$RMSE), min(hv.kstn$RMSE), min(hv.osim$RMSE)),
         max(max(hv.rand$RMSE), max(hv.boot$RMSE), max(hv.kstn$RMSE), max(hv.osim$RMSE))))
 lines(hv.randmc$RMSE~hv.randmc$sample, col=2)
-lines(hv.boot$RMSE~hv.boot$sample, col=3)
-lines(hv.bootmc$RMSE~hv.bootmc$sample, col=4)
-lines(hv.strt$RMSE~hv.strt$sample, col=5)
-lines(hv.strtmc$RMSE~hv.strtmc$sample, col=6)
-lines(hv.kstn$RMSE~hv.kstn$sample, col=7)
-lines(hv.osim$RMSE~hv.osim$sample, col=8)
+lines(hv.boot$RMSE~hv.boot$sample, col=7)
+lines(hv.bootmc$RMSE~hv.bootmc$sample, col=3)
+lines(hv.strt$RMSE~hv.strt$sample, col=8)
+lines(hv.strtmc$RMSE~hv.strtmc$sample, col=4)
+lines(hv.kstn$RMSE~hv.kstn$sample, col=5)
+lines(hv.osim$RMSE~hv.osim$sample, col=6)
+legend("topright", c("Random", "Random Monte Carlo", "Bootstrap", "Bootstrap Monte Carlo",
+    "Stratified random", "Stratified random Monte Carlo", "Kennard-Stone", "Optisim, k=4"), col=c(1,2,7,3,8,4,5,6), lty=c(1,1,1,1,1,1,1,1))
 
 # RPD
 plot(hv.rand$RPD~hv.rand$sample, type="l", xlab="Samples in training set", ylab="RPD", col=1,
