@@ -265,12 +265,12 @@ plot(av.rand$RPD~hv.rand$sample, type="l", xlab="Samples in training set", ylab=
     ylim=c(min(min(av.rand$RPD), min(av.boot$RPD), min(av.kstn$RPD), min(av.osim$RPD)),
         max(max(av.rand$RPD), max(av.boot$RPD), max(av.kstn$RPD), max(av.osim$RPD))))
 lines(av.randmc$RPD~av.randmc$sample, col=2)
-lines(av.boot$RPD~av.boot$sample, col=3)
-lines(av.bootmc$RPD~av.bootmc$sample, col=4)
-lines(av.strt$RPD~av.strt$sample, col=5)
-lines(av.strtmc$RPD~av.strtmc$sample, col=6)
-lines(av.kstn$RPD~av.kstn$sample, col=7)
-lines(av.osim$RPD~av.osim$sample, col=8)
+lines(av.boot$RPD~av.boot$sample, col=7)
+lines(av.bootmc$RPD~av.bootmc$sample, col=3)
+lines(av.strt$RPD~av.strt$sample, col=8)
+lines(av.strtmc$RPD~av.strtmc$sample, col=4)
+lines(av.kstn$RPD~av.kstn$sample, col=5)
+lines(av.osim$RPD~av.osim$sample, col=6)
 
 ## Retry everything with 6 components
 hv6.rand = hvalidation(type="random", ncomp=6)
