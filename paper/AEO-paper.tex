@@ -134,7 +134,9 @@ The RPD values exceeded 3 for Kennard-Stone sampling starting from 132 samples i
 
 \subsubsection{16 latent vectors, Australian soil validation:}\label{sec:AU16}
 
-The results when using an independent validation set are completely different (see figure \ref{rmse-au-16}). Most sampling strategies produce a flat line for RMSE, meaning that adding more samples into the model has no effect at all on the pH prediction accuracy in Australian soils.
+The results when using an independent validation set are completely different (see figure \ref{fig:rmse-au-16}). Most sampling strategies produce a flat line for RMSE, meaning that adding more samples into the model has no effect at all on the pH prediction accuracy in Australian soils.
+
+Kennard-Stone sampling, when the training set is small (less than 100 samples), consistently performs better than random sampling methods, but as the training set increases, it is no longer distinguishable from the random sampling methods.
 
 RPD values never exceeded 0.4 even when the single runs of random sampling methods are taken into account. Thus while the internal prediction of the model when using random Monte Carlo and Kennard-Stone sampling is good enough for screening, the external predictive power of the same model is extremely poor.
 
@@ -143,6 +145,32 @@ RPD values never exceeded 0.4 even when the single runs of random sampling metho
 \begin{center}
     \caption{Performance of various holdout validation strategies as the training set size increases. The validation set consists of all samples in the Australian soil dataset, number of latent vectors used is 16.}
     \label{fig:rmse-au-16}
+\end{center}
+\end{figure}
+
+\subsubsection{6 latent vectors, Netherlands soil validation:}\label{sec:NL6}
+
+When the analysis is repeated for a model using 6 latent vectors, using the Netherlands data for validation, the general pattern stays the same as for 16 latent vectors (see figure \ref{fig:rmse-nl-6}). The main differences are the RMSE values, which are higher as shown in the cross-validation phase, and the patterns for Kennard-Stone sampling as well as Optisim.
+
+At a low number of samples in the training set, Kennard-Stone sampling performs worse than any other sampling method (not counting single random realisations), but evens out at 125 training set samples and has lower RMSE values than other sampling methods as the number of training samples increases past 150. The pattern for Optisim sampling is contrary to that of Kennard-Stone, with Optisim performing the best when the training set is small and worse than the random methods when the training set is larger than 150 samples.
+
+As expected, none of the sampling methods ever achieve an RPD close to 3 when using only 6 latent vectors, with the maximum achieved by Kennard-Stone sampling at 2.12.
+
+\begin{figure}[ht!]
+\includegraphics[width=1.0\columnwidth]{../script/output/rmse-nl-6.pdf}
+\begin{center}
+    \caption{Performance of various holdout validation strategies as the training set size increases. The validation set consists of all samples from the same dataset not used in the training set, number of latent vectors used is 6.}
+    \label{fig:rmse-nl-6}
+\end{center}
+\end{figure}
+
+\subsubsection{6 latent vectors, Australian soil validation:}\label{sec:AU6}
+
+\begin{figure}[ht!]
+\includegraphics[width=1.0\columnwidth]{../script/output/rmse-au-6.pdf}
+\begin{center}
+    \caption{Performance of various holdout validation strategies as the training set size increases. The validation set consists of all samples in the Australian soil dataset, number of latent vectors used is 6.}
+    \label{fig:rmse-nl-6}
 \end{center}
 \end{figure}
 
