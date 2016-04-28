@@ -166,11 +166,15 @@ As expected, none of the sampling methods ever achieve an RPD close to 3 when us
 
 \subsubsection{6 latent vectors, Australian soil validation:}\label{sec:AU6}
 
+When the Australian dataset is used for validation at 6 latent vectors, there are notable changes from when 16 components were used (see figure \ref{fig:rmse-au-6}). The RMSE values are overall lower. The random sampling methods in this case show a small decrease in RMSE when the training set size is increased up to 50, but flattens out after that.
+
+Kennard-Stone sampling shows an even more pronounced inverse curve than in the 16 latent vector case, with the RMSE increasing as more samples are added into the training set, with lower RMSE values than other sampling methods. On the other hand, Optisim starts out performing worse than the other sampling methods, but the RMSE value gets progressively closer to that of the random methods. The highest RPD value achieved by Kennard-Stone sampling is 0.89 at only 20 samples in the training set.
+
 \begin{figure}[ht!]
 \includegraphics[width=1.0\columnwidth]{../script/output/rmse-au-6.pdf}
 \begin{center}
-    \caption{Performance of various holdout validation strategies as the training set size increases. The validation set consists of all samples in the Australian soil dataset, number of latent vectors used is 6.}
-    \label{fig:rmse-nl-6}
+    \caption{Performance of various holdout validation strategies as the training set size increases. The validation set consists of all samples in the Australian soil dataset, number of latent vectors used is 6. The colours represent the same methods as in previous graphs.}
+    \label{fig:rmse-au-6}
 \end{center}
 \end{figure}
 
