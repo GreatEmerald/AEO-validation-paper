@@ -112,6 +112,8 @@ Given the cross-validation results, holdout validation analysis was first done u
 
 \subsection{Holdout validation strategies}\label{sec:Holdout validation strategies 2}
 
+\subsubsection{16 latent vectors, Netherlands soil validation:}\label{sec:NL16}
+
 When comparing how RMSE values change as the number of samples used in the PLS regression increases using various holdout validation strategies, with validation samples from the same dataset, we can see a typical pattern of RMSE gradually going down until it becomes stable at around 150 samples for most sampling strategies (see figure \ref{fig:rmse-nl-16}).
 
 Just like with cross-validation, sampling methods that have a random component to them (simple and stratified random sampling as well as bootstrapping) are not consistent when performed only once and require Monte Carlo simulations to become stable. The standard deviation of these methods is generally higher towards the edges, that is, when either the training or the validation set sizes become low.
@@ -120,11 +122,27 @@ Stratified and simple random sampling after 100 Monte Carlo runs result in very 
 
 Kennard-Stone sampling results in the lowest RMSE values, no matter the sample size. Optisim sampling performs very poorly when the training set size is very low, but quickly gets better as more samples are added to the training set, even overtaking Kennard-Stone sampling at 56 samples in the training set. However, the decrease in RMSE when adding more samples to the model beyond that is no longer any better than when using simple or stratified Monte Carlo methods.
 
+The RPD values exceeded 3 for Kennard-Stone sampling starting from 132 samples in the training set (with a maximum of 3.58 RPD at 240 samples), and never for the other sampling methods (not counting random-based sampling without Monte Carlo), although at the maximum of 256 samples, Monte Carlo simple random sampling achieved 2.98 RPD.
+
 \begin{figure}[ht!]
 \includegraphics[width=1.0\columnwidth]{../script/output/rmse-nl-16.pdf}
 \begin{center}
     \caption{Performance of various holdout validation strategies as the training set size increases. The validation set consists of all samples from the same dataset not used in the training set, number of latent vectors used is 16.}
     \label{fig:rmse-nl-16}
+\end{center}
+\end{figure}
+
+\subsubsection{16 latent vectors, Australian soil validation:}\label{sec:AU16}
+
+The results when using an independent validation set are completely different (see figure \ref{rmse-au-16}). Most sampling strategies produce a flat line for RMSE, meaning that adding more samples into the model has no effect at all on the pH prediction accuracy in Australian soils.
+
+RPD values never exceeded 0.4 even when the single runs of random sampling methods are taken into account. Thus while the internal prediction of the model when using random Monte Carlo and Kennard-Stone sampling is good enough for screening, the external predictive power of the same model is extremely poor.
+
+\begin{figure}[ht!]
+\includegraphics[width=1.0\columnwidth]{../script/output/rmse-au-16.pdf}
+\begin{center}
+    \caption{Performance of various holdout validation strategies as the training set size increases. The validation set consists of all samples in the Australian soil dataset, number of latent vectors used is 16.}
+    \label{fig:rmse-au-16}
 \end{center}
 \end{figure}
 
@@ -147,6 +165,12 @@ From the holdout validation strategies tested, Kennard-Stone sampling performed 
 Stratified random sampling generally performed the same as simple random sampling. This is likely to be due to the rather simplistic method of stratifying chosen. If there was data about the soil type that each spectrum represented, and it was used to divide the dataset into strata, then the performance between simple and stratified sampling might have been different.
 
 Bootstrap sampling performed worse than random sampling without replacement, since samples were duplicated. This acts opposite of the Kennard-Stone method, with more redundant data going into the training set, and the model overfitting those samples, compared to the remaining ones (that were used for validation).
+
+When the Australian soil dataset was used for validation, the model fit was poor for all sampling methods when using 16 latent vectors in the model, in stark contrast with the model fit when the same dataset was used for validation. This indicates that the model is overfitting for the samples in the training dataset, resulting in little to no predictive power outside the training dataset. This is expected, since 16 latent vectors is a very high number for typical applications, and the last latent vectors are likely to not contain any information useful for external prediction at all.
+
+Unfortunately, none of the cross-validation strategies indicated such a problem, with most of them agreeing that 16 latent vectors is the optimal choice. This confirms that cross-validation tends to be overoptimistic. Therefore choosing a lower number of latent vectors than it might appear optimal from cross-validation graphs is important, if external prediction is the goal of the PLSR model. In this case, some of the cross-validation graphs indicated a small local minimum at 6 latent vectors, thus the analysis was repeated for that number of latent vectors.
+
+
 
 {%\footnotesize
 	\begin{spacing}{0.9}% tune the size by altering the parameter
