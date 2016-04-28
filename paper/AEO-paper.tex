@@ -64,7 +64,7 @@ There are numerous strategies for splitting the samples into training and valida
 
 \subsection{Cross-validation strategies}\label{sec:Cross-validation strategies}
 
-In order to assess how cross-validation techniques influence the selection of the number of components, the R package \textit{plsr} was used, specifically the function \textit{validationplot()} with different cross-validation parameters available in the package. Tested cross-validation stategies were: Leave-one-out, 
+In order to assess how cross-validation techniques influence the selection of the number of components, the R package \textit{plsr} was used, specifically the function \textit{validationplot()} with different cross-validation parameters available in the package. Tested cross-validation sampling stategies were: Leave-one-out (LOO), random, Monte Carlo random, interleaved and consecutive. For sampling strategies other than LOO, the full data set was divided into two subsets validated against each other. If the number of subsets increases, the result gets closer and closer to LOO cross-validation result (see ).
 
 \subsection{Holdout validation strategies}\label{sec:Holdout validation strategies}
 
@@ -73,6 +73,11 @@ For assessing holdout validation techniques, samples were split into training an
 \subsection{Data}\label{sec:Data}
 
 The model used for this paper was created by using the Netherlands soil spectra dataset, using the \textit{plsr} package. For assessing the external performance of the resulting models, the Australian soil spectra dataset \cite{rossel2010using}, provided in the \textit{inspectr} package, was used as a validation set.
+
+\section{RESULTS}\label{sec:RESULTS}
+
+
+\section{DISCUSSION}\label{sec:DISCUSSION}
 
 {%\footnotesize
 	\begin{spacing}{0.9}% tune the size by altering the parameter
