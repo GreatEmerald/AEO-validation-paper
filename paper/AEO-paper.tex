@@ -64,7 +64,7 @@ There are numerous strategies for splitting the samples into training and valida
 
 \subsection{Cross-validation strategies}\label{sec:Cross-validation strategies}
 
-In order to assess how cross-validation techniques influence the selection of the number of components, the R package \textit{plsr} was used, specifically the function \textit{validationplot()} with different cross-validation parameters available in the package. The validation plots show how the root mean square error of prediction (RMSEP) changes with an increasing number of latent vectors used in the regression.
+In order to assess how cross-validation techniques influence the selection of the number of components, the \textit{R} package \textit{plsr} was used, specifically the function \textit{validationplot()} with different cross-validation parameters available in the package. The validation plots show how the root mean square error of prediction (RMSEP) changes with an increasing number of latent vectors used in the regression.
 
 Tested cross-validation sampling stategies were: Leave-one-out (LOO), random, interleaved and consecutive sampling, as well as the mean of 100 Monte Carlo runs of random sampling. For sampling strategies other than LOO, the full data set was divided into two subsets validated against each other (2-fold cross-validation). If the number of subsets \textit{k} is increased, the result gets closer and closer to LOO cross-validation result (see figure \ref{fig:interleaved-group-sizes}), and at 16 groups is already very close to LOO.
 
@@ -78,17 +78,17 @@ Tested cross-validation sampling stategies were: Leave-one-out (LOO), random, in
 
 \subsection{Holdout validation strategies}\label{sec:Holdout validation strategies}
 
-For assessing holdout validation techniques, samples were split into training and validation sets manually for random without replacement, random with replacement (bootstrapping) and stratified random sampling. For the respective Monte Carlo simulations, the splitting into different sets was repeated 100 times, and the result was averaged over all runs. For Kennard-Stone sampling, the R package \textit{inspectr} was used to generate the validation sample set, based on the Kennard-Stone algorithm \cite{kennard1969computer}. For OptiSim sampling \cite{clark1997optisim}, the latest in-development code from the \textit{inspectr} package was used. OptiSim sampling was run using clusters of 4 samples (k = 4), since studies have shown that this setting generally performs the best on hyperspectral datasets \cite{clark2003boosted}.
+For assessing holdout validation techniques, samples were split into training and validation sets manually for random without replacement, random with replacement (bootstrapping) and stratified random sampling. For the respective Monte Carlo simulations, the splitting into different sets was repeated 100 times, and the result was averaged over all runs. In addition, Kennard-Stone and Optisim sampling was tested. For Kennard-Stone sampling, the \textit{R} package \textit{inspectr} was used to generate the validation sample set, based on the Kennard-Stone maximum difference algorithm \cite{kennard1969computer}. For Optisim sampling \cite{clark1997optisim}, the latest in-development code from the \textit{inspectr} package was used. The Optisim algorithm is also a differencing algorithm like Kennard-Stone, but instead of differencing every sample against each other, cluster means are differences insdead. Optisim sampling was run using clusters of 4 samples (\textit{k} = 4), since studies have shown that this setting generally performs the best on hyperspectral datasets \cite{clark2003boosted}.
 
 Two strata were used for stratified random sampling: one stratum included samples with pH below the median pH for all samples (6.11), and the other included all samples equal or above the median. The strata were chosen as such because pH distribution among samples is bimodal, with fewer values around the median value (which is also close to the neutral pH value of 7). Splitting the strata at the median allows for balanced strata, without the need to use bootstrapping or drop samples.
 
-The validation was repeated twice: the first time the validation set used all unused samples from the same Netherlands soil dataset as the training set, whereas the second time the external Australian soil dataset was used for validation.
+Validation was repeated twice, once for internal and once for external validation: the first time the validation set used all unused samples from the same Netherlands soil dataset as the training set, whereas the second time the full external Australian soil dataset was used for validation.
 
-In addition, the above was repeated twice, using different number of latent vectors for the PLS regression, in order to see how the choice of the number of latent vectors from cross-validation impacts the PLS regression and its holdout validation.
+In addition, the above analysis was repeated twice, using different number of latent vectors for the PLS regression, in order to see how the choice of the number of latent vectors from cross-validation impacts the PLS regression and the resulting holdout validation scores.
 
 \subsection{Data}\label{sec:Data}
 
-The model used for this paper was created by using the Netherlands soil spectra dataset, using the \textit{plsr} package. For assessing the external performance of the resulting models, the Australian soil spectra dataset \cite{rossel2010using}, provided in the \textit{inspectr} package, was used as a validation set.
+The models used for this paper were created by using the Netherlands soil spectra dataset made by Alterra \cite{groenestijn2009}. Samples in the dataset were taken by imaging a variety of soil samples using a field spectrometer, after the samples were dried and sieved. The samples were taken predominantly from clay soils. For assessing the external performance of the resulting models, the Australian soil spectra dataset \cite{rossel2010using}, provided in the \textit{inspectr} package, was used as a validation set.
 
 \section{RESULTS}\label{sec:RESULTS}
 
