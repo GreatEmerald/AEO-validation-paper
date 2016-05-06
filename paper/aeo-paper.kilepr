@@ -9,7 +9,7 @@ kile_livePreviewStatusUserSpecified=false
 kile_livePreviewTool=LivePreview-PDFLaTeX
 kileprversion=2
 kileversion=2.9.60
-lastDocument=AEO-paper.bib
+lastDocument=AEO-paper.tex
 masterDocument=
 name=AEO-paper
 pkg_extIsRegExp=false
@@ -39,20 +39,20 @@ Mode=LaTeX
 
 [item:AEO-paper.bib]
 archive=true
-column=18
+column=32
 encoding=UTF-8
 highlight=BibTeX
-line=34
+line=84
 mode=BibTeX
 open=true
 order=1
 
 [item:AEO-paper.tex]
 archive=true
-column=880
+column=585
 encoding=UTF-8
 highlight=LaTeX
-line=58
+line=216
 mode=LaTeX
 open=true
 order=0
