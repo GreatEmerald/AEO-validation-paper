@@ -300,12 +300,12 @@ plot(hv6.rand$RPD~hv6.rand$sample, type="l", xlab="Samples in training set", yla
     ylim=c(min(min(hv6.rand$RPD), min(hv6.boot$RPD), min(hv6.kstn$RPD), min(hv6.osim$RPD)),
         max(max(hv6.rand$RPD), max(hv6.boot$RPD), max(hv6.kstn$RPD), max(hv6.osim$RPD))))
 lines(hv6.randmc$RPD~hv6.randmc$sample, col=2)
-lines(hv6.boot$RPD~hv6.boot$sample, col=3)
-lines(hv6.bootmc$RPD~hv6.bootmc$sample, col=4)
-lines(hv6.strt$RPD~hv6.strt$sample, col=5)
-lines(hv6.strtmc$RPD~hv6.strtmc$sample, col=6)
-lines(hv6.kstn$RPD~hv6.kstn$sample, col=7)
-lines(hv6.osim$RPD~hv6.osim$sample, col=8)
+lines(hv6.boot$RPD~hv6.boot$sample, col=7)
+lines(hv6.bootmc$RPD~hv6.bootmc$sample, col=3)
+lines(hv6.strt$RPD~hv6.strt$sample, col=8)
+lines(hv6.strtmc$RPD~hv6.strtmc$sample, col=4)
+lines(hv6.kstn$RPD~hv6.kstn$sample, col=5)
+lines(hv6.osim$RPD~hv6.osim$sample, col=6)
 
 av6.rand = hvalidation(type="random", validation.set=AUSTRALIA, ncomp=6)
 av6.randmc = hvalidation(type="random", mc.runs=100, validation.set=AUSTRALIA, ncomp=6)
